@@ -1,0 +1,37 @@
+{
+  "name": "slack2archive",
+  "version": "1.0.0",
+  "description": "A tool for converting slack JSON archives to readable format",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zhuo Chen",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc -w",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "dev.install": "npm run build && npm link",
+    "dev.uninstall": "npm unlink -g s2a",
+    "prepublishOnly": "npm run build"
+  },
+  "bin": {
+    "s2a": "./dist/cli.js"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/commander": "^2.12.5",
+    "@types/node": "^22.13.9",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.2",
+    "eslint-plugin-prettier": "^5.2.3",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "commander": "^13.1.0"
+  }
+}
