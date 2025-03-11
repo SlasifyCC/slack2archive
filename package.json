@@ -4,10 +4,6 @@
   "description": "A tool for converting slack JSON archives to readable format",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Zhuo Chen",
-  "scripts": {
     "build": "tsc",
     "start": "tsc -w",
     "lint": "eslint . --ext .ts",
@@ -16,6 +12,7 @@
     "dev.uninstall": "npm unlink -g s2a",
     "prepublishOnly": "npm run build"
   },
+  "author": "Zhuo Chen",
   "bin": {
     "s2a": "./dist/cli.js"
   },
@@ -32,6 +29,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "commander": "^13.1.0"
+    "commander": "^13.1.0",
+    "dayjs": "^1.11.13"
   }
 }
