@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import * as fs from "fs/promises";
 import { FileData, MessageData } from "../archive";
+import path from "path";
 
 function parseTs(ts: string) {
   const [time] = ts.split(".");
@@ -32,8 +33,8 @@ export class File {
     return this.mimeType.startsWith("image/");
   }
 
-  public toMarkdownLink() {
-    return `${this.isImage ? "!" : ""}[${this.title}](${this.fileName})`;
+  public toMarkdownLink(fileDir: string) {
+    return `${this.isImage ? "!" : ""}[${this.title}](${path.join(fileDir, this.fileName)})`;
   }
 }
 
@@ -50,12 +51,14 @@ export class Message {
     this.userId = data.user;
     this.time = parseTs(data.ts);
     this.text = data.text;
-    this.files = data.files.map((file) => new File(file));
+    this.files = data?.files?.map((file) => new File(file)) ?? [];
     this.isMainThread = data.ts === data.thread_ts;
 
     this.replies = new Map<string, Message | null>();
-    for (const reply of data.replies) {
-      this.replies.set(reply.ts, null);
+    if (Array.isArray(data.replies)) {
+      for (const reply of data.replies) {
+        this.replies.set(reply.ts, null);
+      }
     }
   }
 

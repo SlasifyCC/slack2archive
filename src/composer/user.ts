@@ -10,7 +10,7 @@ export class User {
     this.name = data.profile.display_name_normalized;
   }
 
-  public toString(): string {
+  public toNameTag(): string {
     return `<@${this.name}>`;
   }
 }

@@ -19,6 +19,7 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/commander": "^2.12.5",
+    "@types/lodash": "^4.17.16",
     "@types/node": "^22.13.9",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
@@ -30,6 +31,7 @@
   },
   "dependencies": {
     "commander": "^13.1.0",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "lodash": "^4.17.21"
   }
 }
