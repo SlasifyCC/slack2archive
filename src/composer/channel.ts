@@ -64,8 +64,9 @@ function composeMessage(
   indentLevel = 0,
 ) {
   const author = users.get(message.userId);
+  const icon = indentLevel <= 0 ? "💬" : "🗨️";
   const lines: string[] = [
-    `**${message.printTime()}|${author?.name || "unknown"}**`,
+    `${icon}**${message.printTime()}|${author?.name || "unknown"}**`,
     ...formatMessageText(message, users).split("\n"),
   ];
 

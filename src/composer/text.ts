@@ -16,7 +16,7 @@ export function formatMessageText(message: Message, users: UserMap): string {
 
 function replaceSlackLinks(content: string) {
   return content.replace(slackLinkRegExp, (_, ...[url, text]) => {
-    return `[${url}](${text})`;
+    return `[${url}](${text || url})`;
   });
 }
 
