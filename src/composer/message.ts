@@ -2,15 +2,7 @@ import dayjs from "dayjs";
 import * as fs from "fs/promises";
 import { FileData, MessageData } from "../archive";
 import path from "path";
-
-function parseTs(ts: string) {
-  const [time] = ts.split(".");
-  const unixTime = parseInt(time);
-  if (isNaN(unixTime)) {
-    throw new Error(`invalid message timestamp: ${ts}`);
-  }
-  return dayjs.unix(unixTime);
-}
+import { parseTs } from "../utils/ts";
 
 export class File {
   public id: string;
@@ -62,8 +54,7 @@ export class Message {
     }
   }
 
-  public connectReplies(allMessages: Map<string, Message>) {
-    const replyIds: string[] = Array.from(this.replies.keys());
+  public connectReplies(replyIds: string[], allMessages: Map<string, Message>) {
     replyIds.forEach((id) => {
       const reply = allMessages.get(id);
       if (reply) {
@@ -91,7 +82,12 @@ export async function readMessages(fileName: string): Promise<MessageMap> {
     const removingIds: string[] = [];
     for (const message of messages.values()) {
       if (message.isMainThread) {
-        removingIds.push(...message.connectReplies(messages));
+        removingIds.push(
+          ...message.connectReplies(
+            Array.from(message.replies.keys()),
+            messages,
+          ),
+        );
       }
     }
     removingIds.forEach((id) => messages.delete(id));
