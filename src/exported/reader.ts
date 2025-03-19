@@ -12,6 +12,11 @@ interface ReaderContext {
   channels: ChannelData[];
 }
 
+export interface ChannelThreads {
+  channel: ChannelData;
+  threads: Thread[];
+}
+
 export async function readCategory({
   baseDir,
   categoryDir,
@@ -29,7 +34,12 @@ export async function readCategory({
     outputDir,
     channels,
   };
-  return Promise.all(channels.map((channel) => readThreads(ctx, channel)));
+  return Promise.all<ChannelThreads>(
+    channels.map(async (channel) => ({
+      channel: channel,
+      threads: await readThreads(ctx, channel),
+    })),
+  );
 }
 
 async function readChannelList(manifestCsv: string) {
@@ -64,6 +74,9 @@ async function readThreads(ctx: ReaderContext, channel: ChannelData) {
       "utf8",
     ),
   ) as ThreadData[];
-  const messageDir = path.resolve(ctx.baseDir, "messages", channel.id);
-  return threadList.map((thread) => new Thread(thread.ts, messageDir, channel));
+  const channelMsgsDir = path.resolve(ctx.baseDir, "messages", channel.id);
+  return threadList.map(
+    (thread) =>
+      new Thread(thread.ts, path.resolve(channelMsgsDir, thread.ts), channel),
+  );
 }

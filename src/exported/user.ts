@@ -1,4 +1,4 @@
-import { UserData } from "../archive";
+import { UserData } from "./types";
 import * as fs from "fs/promises";
 
 export class User {

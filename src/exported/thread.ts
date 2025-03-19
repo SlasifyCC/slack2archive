@@ -1,10 +1,10 @@
 import { createReadStream, existsSync } from "fs";
 import path from "path";
 import csv from "csv-parser";
-import { readFile } from "fs/promises";
+import { cp, readFile } from "fs/promises";
 import { MessageData } from "./types";
-import { Message } from "../composer/message";
-import { ChannelData } from "../archive";
+import { Message } from "./message";
+import { ChannelData } from "./types";
 import { parseTsToDate } from "../utils/ts";
 
 export class Thread {
@@ -51,7 +51,7 @@ export class Thread {
     });
   }
 
-  private async parseMessages() {
+  private async parseMessages(): Promise<Message | null> {
     const filePath = this.getPath(`${this.id}.json`);
     const file = await readFile(filePath, "utf8");
     const fileData = JSON.parse(file) as MessageData[];
@@ -71,7 +71,7 @@ export class Thread {
   public async build() {
     try {
       await this.parseReplyIds();
-      await this.parseMessages();
+      return await this.parseMessages();
     } catch (e) {
       console.error(`Failed to read thread ${this.id}`);
       throw e;
@@ -80,5 +80,11 @@ export class Thread {
 
   public get date() {
     return parseTsToDate(this.id);
+  }
+
+  public async copyFiles(destDir: string) {
+    const src = this.getPath("files");
+    if (!existsSync(src)) return;
+    await cp(src, destDir, { recursive: true });
   }
 }

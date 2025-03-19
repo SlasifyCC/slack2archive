@@ -1,9 +1,21 @@
 import dayjs from "dayjs";
-import * as fs from "fs/promises";
-import { FileData, MessageData } from "../archive";
+import { FileData, MessageData } from "./types";
 import path from "path";
 import { parseTs } from "../utils/ts";
 
+const ImageExtensions = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+  ".avif",
+  ".svg",
+  ".ico",
+  ".bmp",
+  ".heif",
+  ".heic",
+];
 export class File {
   public id: string;
   public rawName: string;
@@ -22,7 +34,7 @@ export class File {
   }
 
   public get isImage() {
-    return this.mimeType.startsWith("image/");
+    return ImageExtensions.includes(path.parse(this.fileName).ext);
   }
 
   public toMarkdownLink(fileDir: string) {
@@ -70,30 +82,3 @@ export class Message {
 }
 
 export type MessageMap = Map<string, Message>;
-
-export async function readMessages(fileName: string): Promise<MessageMap> {
-  try {
-    const file = await fs.readFile(fileName, "utf8");
-    const fileData = JSON.parse(file) as MessageData[];
-    const messages = new Map<string, Message>();
-    for (const item of fileData) {
-      messages.set(item.ts, new Message(item));
-    }
-    const removingIds: string[] = [];
-    for (const message of messages.values()) {
-      if (message.isMainThread) {
-        removingIds.push(
-          ...message.connectReplies(
-            Array.from(message.replies.keys()),
-            messages,
-          ),
-        );
-      }
-    }
-    removingIds.forEach((id) => messages.delete(id));
-    return messages;
-  } catch (e) {
-    console.error(`Filed to read users file: ${fileName}`);
-    throw e;
-  }
-}

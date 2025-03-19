@@ -1,5 +1,5 @@
-import { Message } from "./message";
-import { UserMap } from "./user";
+import { Message } from "../exported/message";
+import { UserMap } from "../exported/user";
 
 const slackLinkRegExp = /<([^@|>\n][^|>\n]*)(?:\|([^>\n]*))?>/gi;
 const userHandleRegExp = /<@(U[A-Z0-9]+)>/gi;
