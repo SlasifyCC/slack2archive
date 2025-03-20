@@ -8,7 +8,6 @@ import { Thread } from "./thread";
 
 interface ReaderContext {
   baseDir: string;
-  outputDir: string;
   channels: ChannelData[];
 }
 
@@ -21,17 +20,14 @@ export async function readCategory({
   baseDir,
   categoryDir,
   manifestCsv,
-  outputDir,
 }: {
   baseDir: string;
   categoryDir: string;
   manifestCsv: string;
-  outputDir: string;
 }) {
   const channels = await readChannelList(path.resolve(baseDir, manifestCsv));
   const ctx: ReaderContext = {
     baseDir: path.resolve(baseDir, categoryDir),
-    outputDir,
     channels,
   };
   return Promise.all<ChannelThreads>(

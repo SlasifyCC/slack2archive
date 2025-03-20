@@ -7,7 +7,10 @@ interface CategoryConfig {
   categoryDir: string;
   manifestCsv: string;
 }
-export const exportConfigs = new Map<string, ExportConfig>([
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ExportTypeValues = ["private", "public", "dm", "multi-dms"] as const;
+export type ExportTypes = (typeof ExportTypeValues)[number];
+export const exportConfigs = new Map<ExportTypes, ExportConfig>([
   [
     "private",
     {

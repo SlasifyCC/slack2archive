@@ -10,8 +10,10 @@ export async function writeChannel(
   { channel, threads }: ChannelThreads,
   users: UserMap,
 ) {
-  console.log(`Writing messages of channel ${channel.name}(${channel.id})`);
   const channelDir = path.resolve(outBaseDir, channel.name);
+  console.log(
+    `Writing messages of channel ${channel.name}(${channel.id}) to ${channelDir}`,
+  );
   for (const thread of threads) {
     const message = await thread.build();
     if (message == null) {
