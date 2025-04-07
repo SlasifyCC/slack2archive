@@ -2,7 +2,7 @@ import { Message } from "../exported/message";
 import { User, UserMap } from "../exported/user";
 import { UserGroup, UserGroupMap } from "../exported/usergroup";
 
-const slackLinkRegExp = /<([^@|>\n][^|>\n]*)(?:\|([^>\n]*))?>/gi;
+const slackLinkRegExp = /<(?!\!subteam\^)([^@|>\n][^|>\n]*)(?:\|([^>\n]*))?>/gi;
 const inlineEmojiRegExp = /:[A-Za-z0-9-_]+:/gi;
 
 export function formatMessageText(
@@ -10,11 +10,12 @@ export function formatMessageText(
   users: UserMap,
   userGroups: UserGroupMap,
 ): string {
-  return new TextPipeline(message.text)
+  const pipeline = new TextPipeline(message.text)
     .do(replaceEmojis())
+    .do(replaceSlackLinks())
     .do(replaceUserGroupHandles(userGroups))
-    .do(replaceUserHandles(users))
-    .do(replaceSlackLinks()).content;
+    .do(replaceUserHandles(users));
+  return pipeline.content;
 }
 
 class TextPipeline {
@@ -34,7 +35,7 @@ type TextProcessor = (t: TextPipeline) => string;
 function replaceSlackLinks(): TextProcessor {
   return (t) =>
     t.content.replace(slackLinkRegExp, (_, ...[url, text]) => {
-      return `[${url}](${text || url})`;
+      return `[${text || url}](${url})`;
     });
 }
 

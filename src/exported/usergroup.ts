@@ -12,8 +12,7 @@ export class UserGroup {
   }
 
   public toNameTag(): string {
-    console.log("user group", this.name);
-    return `<${this.name}>`;
+    return `<@${this.name}>`;
   }
 }
 export type UserGroupMap = Map<string, UserGroup>;
