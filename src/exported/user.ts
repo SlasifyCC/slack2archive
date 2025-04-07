@@ -16,17 +16,18 @@ export class User {
 }
 export type UserMap = Map<string, User>;
 
-export async function readUsers(fileName: string): Promise<UserMap> {
-  try {
-    const file = await fs.readFile(fileName, "utf8");
-    const fileData = JSON.parse(file) as UserData[];
-    const users = new Map<string, User>();
-    for (const item of fileData) {
-      users.set(item.id, new User(item));
+export async function readUsers(fileNames: string[]): Promise<UserMap> {
+  const users = new Map<string, User>();
+  for (const fileName of fileNames) {
+    try {
+      const file = await fs.readFile(fileName, "utf8");
+      const fileData = JSON.parse(file) as UserData[];
+      for (const item of fileData) {
+        users.set(item.id, new User(item));
+      }
+    } catch (e) {
+      console.error(`Failed reading users file ${fileName}: ${e}`);
     }
-    return users;
-  } catch (e) {
-    console.error(`Filed to read users file: ${fileName}`);
-    throw e;
   }
+  return users;
 }

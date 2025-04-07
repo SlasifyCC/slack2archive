@@ -23,6 +23,9 @@ function replaceSlackLinks(content: string) {
 function replaceUserHandles(content: string, users: UserMap): string {
   return content.replace(userHandleRegExp, (original, ...[userId]) => {
     const user = users.get(userId);
+    if (!users) {
+      console.warn(`failed to map user ${userId}`);
+    }
     return user ? user.toNameTag() : original;
   });
 }

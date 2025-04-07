@@ -26,6 +26,7 @@ export async function readCategory({
   manifestCsv: string;
 }) {
   const channels = await readChannelList(path.resolve(baseDir, manifestCsv));
+  console.log(`${channels.length} channels in the manifest`);
   const ctx: ReaderContext = {
     baseDir: path.resolve(baseDir, categoryDir),
     channels,
@@ -41,6 +42,7 @@ export async function readCategory({
 async function readChannelList(manifestCsv: string) {
   return new Promise<ChannelData[]>((resolve, reject) => {
     if (!existsSync(manifestCsv)) {
+      console.warn(`channels manifeset not found at ${manifestCsv}`);
       resolve([]);
       return;
     }
