@@ -10,47 +10,56 @@ export function formatMessageText(
   users: UserMap,
   userGroups: UserGroupMap,
 ): string {
-  return message.text
-    ? replaceSlackLinks(
-        replaceEmojis(
-          replaceUserGroupHandles(
-            replaceUserHandles(message.text, users),
-            userGroups,
-          ),
-        ),
-      )
-    : "";
+  return new TextPipeline(message.text)
+    .do(replaceEmojis())
+    .do(replaceUserGroupHandles(userGroups))
+    .do(replaceUserHandles(users))
+    .do(replaceSlackLinks()).content;
 }
 
-function replaceSlackLinks(content: string) {
-  return content.replace(slackLinkRegExp, (_, ...[url, text]) => {
-    return `[${url}](${text || url})`;
-  });
+class TextPipeline {
+  public content: string;
+
+  constructor(content: string) {
+    this.content = content;
+  }
+  public do(p: TextProcessor) {
+    const newContent = p(this);
+    this.content = newContent;
+    return this;
+  }
+}
+type TextProcessor = (t: TextPipeline) => string;
+
+function replaceSlackLinks(): TextProcessor {
+  return (t) =>
+    t.content.replace(slackLinkRegExp, (_, ...[url, text]) => {
+      return `[${url}](${text || url})`;
+    });
 }
 
-function replaceUserHandles(content: string, users: UserMap): string {
-  return content.replace(User.RegExp, (original, ...[userId]) => {
-    const user = users.get(userId);
-    if (!users) {
-      console.warn(`failed to map user ${userId}`);
-    }
-    return user ? user.toNameTag() : original;
-  });
+function replaceUserHandles(users: UserMap): TextProcessor {
+  return (t) =>
+    t.content.replace(User.RegExp, (original, ...[userId]) => {
+      const user = users.get(userId);
+      if (!users) {
+        console.warn(`failed to map user ${userId}`);
+      }
+      return user ? user.toNameTag() : original;
+    });
 }
 
-function replaceUserGroupHandles(
-  content: string,
-  userGroups: UserGroupMap,
-): string {
-  return content.replace(UserGroup.RegExp, (original, ...[userGroupId]) => {
-    const user = userGroups.get(userGroupId);
-    if (!userGroups) {
-      console.warn(`failed to map user group ${userGroupId}`);
-    }
-    return user ? user.toNameTag() : original;
-  });
+function replaceUserGroupHandles(userGroups: UserGroupMap): TextProcessor {
+  return (t) =>
+    t.content.replace(UserGroup.RegExp, (original, ...[userGroupId]) => {
+      const user = userGroups.get(userGroupId);
+      if (!userGroups) {
+        console.warn(`failed to map user group ${userGroupId}`);
+      }
+      return user ? user.toNameTag() : original;
+    });
 }
 
-function replaceEmojis(content: string): string {
-  return content.replace(inlineEmojiRegExp, "");
+function replaceEmojis(): TextProcessor {
+  return (t) => t.content.replace(inlineEmojiRegExp, "");
 }
