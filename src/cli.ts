@@ -7,6 +7,7 @@ import { ChannelThreads, readCategory } from "./exported/reader";
 import { CategoryConfig, exportConfigs, ExportTypes } from "./config";
 import { readUsers, UserMap } from "./exported/user";
 import { trim } from "lodash";
+import { readUserGroups, UserGroupMap } from "./exported/usergroup";
 
 interface TypedExportOptions {
   onlyChannels?: string[];
@@ -17,6 +18,7 @@ interface CustomExportOptions {
   contentDir: string;
   manifest: string;
   usersFiles: string[];
+  userGroupsFile: string;
   onlyChannels?: string[];
 }
 
@@ -76,6 +78,10 @@ function makeCustomExportCommand() {
       "-u --usersFiles <usersFiles>",
       "The relative file paths of user lists, sepearated by commas",
     )
+    .option(
+      "-g --userGroupsFile <userGroupsFile>",
+      "The relative file paths of user group list, sepearated by commas",
+    )
     .action(async (rootDir, outDir, { channels, usersFiles, ...restOptions }) =>
       runCustomExport(rootDir, outDir, {
         onlyChannels: channels?.split(",").map(trim) || [],
@@ -94,6 +100,8 @@ async function runTypedExport(
   console.log("Root directory", rootDir);
   console.log("Output Directory", outDir);
   const users = await readUsers([path.resolve(rootDir, "users/users.json")]);
+  // TODO: read user groups
+  const userGroups = new Map();
   console.log(Array.from(users.keys()).length, "users are loaded.");
   const exportConfig = exportConfigs.get(exportType);
   if (!exportConfig) {
@@ -108,7 +116,7 @@ async function runTypedExport(
       manifestCsv: category.manifestCsv,
     }),
   }));
-  await runJobs(jobs, outDir, users, onlyChannels);
+  await runJobs(jobs, outDir, users, userGroups, onlyChannels);
 }
 
 async function runCustomExport(
@@ -121,6 +129,7 @@ async function runCustomExport(
     category: categoryName,
     contentDir,
     usersFiles,
+    userGroupsFile,
     onlyChannels,
   } = options;
   if (
@@ -143,6 +152,9 @@ async function runCustomExport(
   const users = await readUsers(
     usersFiles.map((f) => path.resolve(rootDir, f)),
   );
+  const userGroups = await readUserGroups(
+    path.resolve(rootDir, userGroupsFile),
+  );
   console.log("Root directory", rootDir);
   console.log("Output Directory", outDir);
   const category: CategoryConfig = {
@@ -158,13 +170,20 @@ async function runCustomExport(
       manifestCsv: category.manifestCsv,
     }),
   };
-  await runJobs([Promise.resolve(job)], outDir, users, onlyChannels);
+  await runJobs(
+    [Promise.resolve(job)],
+    outDir,
+    users,
+    userGroups,
+    onlyChannels,
+  );
 }
 
 async function runJobs(
   jobs: Promise<Job>[],
   outDir: string,
   users: UserMap,
+  userGroups: UserGroupMap,
   onlyChannels: string[] | undefined,
 ) {
   const allChannelThreads = await Promise.all(jobs);
@@ -184,6 +203,7 @@ async function runJobs(
               path.resolve(outDir, category.name),
               channelThreads,
               users,
+              userGroups,
             ),
           ),
       ),

@@ -32,3 +32,8 @@ export interface ChannelData {
 export interface ThreadData {
   ts: string;
 }
+
+export interface UserGroupData {
+  id: string;
+  name: string;
+}

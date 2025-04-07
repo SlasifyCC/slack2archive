@@ -4,11 +4,13 @@ import { UserMap } from "../exported/user";
 import { Message } from "../exported/message";
 import { formatMessageText } from "./text";
 import { ChannelThreads } from "../exported/reader";
+import { UserGroupMap } from "../exported/usergroup";
 
 export async function writeChannel(
   outBaseDir: string,
   { channel, threads }: ChannelThreads,
   users: UserMap,
+  userGroups: UserGroupMap,
 ) {
   const channelDir = path.resolve(outBaseDir, channel.name);
   console.log(
@@ -23,7 +25,7 @@ export async function writeChannel(
     const threadDir = path.resolve(channelDir, thread.id);
     const content = [
       composeFrontmatter(channel.name, thread.date),
-      composeMessage(message, users, ""),
+      composeMessage(message, users, userGroups, ""),
     ].join("\n\n");
     await fs.mkdir(threadDir, { recursive: true });
     const threadFile = path.resolve(threadDir, `${thread.id}.md`);
@@ -43,6 +45,7 @@ date: ${date}
   function composeMessage(
     message: Message,
     users: UserMap,
+    userGroups: UserGroupMap,
     fileDir: string,
     indentLevel = 0,
   ) {
@@ -50,7 +53,7 @@ date: ${date}
     const icon = indentLevel <= 0 ? "💬" : "🗨️";
     const lines: string[] = [
       `${icon}**${author?.name || "unknown"} | ${message.printTime()}**`,
-      ...formatMessageText(message, users).split("\n"),
+      ...formatMessageText(message, users, userGroups).split("\n"),
     ];
 
     for (const file of message.files) {
@@ -59,7 +62,7 @@ date: ${date}
     for (const reply of message.replies.values()) {
       if (!reply) continue;
       lines.push(
-        `-  ${composeMessage(reply, users, fileDir, indentLevel + 1)}`,
+        `-  ${composeMessage(reply, users, userGroups, fileDir, indentLevel + 1)}`,
       );
     }
 

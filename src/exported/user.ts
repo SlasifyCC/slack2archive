@@ -2,6 +2,7 @@ import { UserData } from "./types";
 import * as fs from "fs/promises";
 
 export class User {
+  public static RegExp = /<@(U[A-Z0-9]+)>/gi;
   public id: string;
   public name: string;
 
