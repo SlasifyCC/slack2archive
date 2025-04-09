@@ -1,0 +1,38 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*" # Use the latest LTS version
+
+      - name: Install dependencies
+        run: npm install --frozen-lockfile
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Install pkg
+        run: npm install --global pkg
+
+      - name: Build executables
+        run: |
+          mkdir dist-executables
+          pkg ./dist/cli.js --targets node16-linux-x64,node18-win-x64,node20-macos-arm64 --output dist-executables/s2a
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist-executables/*
