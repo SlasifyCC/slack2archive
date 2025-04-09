@@ -40,7 +40,7 @@ export class Thread {
           }),
         )
         .on("data", ({ replyTs }) => {
-          if (replyTs !== this.id) {
+          if (!!replyTs && replyTs !== this.id) {
             this.replyIds.push(replyTs);
           }
         })

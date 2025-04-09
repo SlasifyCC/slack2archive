@@ -54,11 +54,14 @@ async function readChannelList(manifestCsv: string) {
           headers: ["id", "name"],
         }),
       )
-      .on("data", ({ id, name }) =>
-        results.push({
-          id,
-          name,
-        }),
+      .on(
+        "data",
+        ({ id, name }) =>
+          !!id &&
+          results.push({
+            id,
+            name,
+          }),
       )
       .on("end", () => resolve(results))
       .on("error", (e) => reject(e));
