@@ -18,9 +18,6 @@ jobs:
         with:
           node-version: "lts/*" # Use the latest LTS version
 
-      - name: Set npm registry to default
-        run: npm config set registry https://registry.npmjs.org/
-
       - name: Install dependencies
         run: npm install --frozen-lockfile
 
