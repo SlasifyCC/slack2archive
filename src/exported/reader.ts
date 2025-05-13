@@ -31,12 +31,13 @@ export async function readCategory({
     baseDir: path.resolve(baseDir, categoryDir),
     channels,
   };
-  return Promise.all<ChannelThreads>(
+  const channelThreads = await Promise.all<ChannelThreads>(
     channels.map(async (channel) => ({
       channel: channel,
       threads: await readThreads(ctx, channel),
     })),
   );
+  return channelThreads.filter(({ threads }) => threads && threads.length > 0);
 }
 
 async function readChannelList(manifestCsv: string) {
@@ -69,11 +70,14 @@ async function readChannelList(manifestCsv: string) {
 }
 
 async function readThreads(ctx: ReaderContext, channel: ChannelData) {
+  const threadListFilePath = path.resolve(
+    path.resolve(ctx.baseDir, "threads"),
+    `${channel.id}.json`,
+  );
+  if (!existsSync(threadListFilePath)) return [];
+
   const threadList = JSON.parse(
-    await readFile(
-      path.resolve(path.resolve(ctx.baseDir, "threads"), `${channel.id}.json`),
-      "utf8",
-    ),
+    await readFile(threadListFilePath, "utf8"),
   ) as ThreadData[];
   const channelMsgsDir = path.resolve(ctx.baseDir, "messages", channel.id);
   return threadList.map(
